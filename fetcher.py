@@ -31,6 +31,16 @@ def capitalize(x):
     else:
         return x.capitalize()
 
+def getAuthor(e, description):
+    "heuristic to extract real author"
+    author = e.get('author', u'')
+    if author.startswith('repubblicawww@repubblica.it'):
+        m = re.compile('<br />di (.+?)<br').search(description)
+        if m:
+            author = m.group(1)
+            author = ' '.join([capitalize(x) for x in author.split()])
+    return author
+
 def main():
 
     try:
@@ -87,12 +97,7 @@ def main():
             if 'enclosures' in e:
                 enclosure = unicode(e.enclosures[0])
             category = e.get('category', u'')
-            author = e.get('author', u'')
-            if author.startswith('repubblicawww@repubblica.it'):
-                m = re.compile('<br />di (.+?)<br').search(description)
-                if m:
-                    author = m.group(1)
-                    author = ' '.join([capitalize(x) for x in author.split()])
+            author = getAuthor(e, description)
             item = Item(ch, e.id, title, link, description, t,
                         enclosure, category, author)
             store.add(item)
